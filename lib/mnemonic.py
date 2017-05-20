@@ -46,3 +46,13 @@ class CounterpartyMnemonic(object):
 		l = hmac.new('Bitcoin seed'.encode('ascii'), s, sha512).digest()
 		il, ir = l[ : 32], l[32 : ]
 		return BIP32Key(secret=il, chain=ir, depth=0, index=0, fpr='\0\0\0\0'.encode('ascii'), public=False)
+	
+	def get_address_at(self, key, n, harden=True):
+		if harden:
+			acc0 = key.ChildKey(BIP32_HARDEN)
+		else:
+			acc0 = key.ChildKey(0)
+		external_acc = acc0.ChildKey(0)
+		accn = external_acc.ChildKey(n)
+		return accn
+	
