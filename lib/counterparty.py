@@ -51,7 +51,7 @@ def rpc_request(payload, callback, tojson=True):
 	
 	AsyncRequest(
 		'POST', url, json.dumps(payload), headers={
-			'Authorization': 'Basic {}'.format(b64encode(bytes('{}:{}'.format(user, pw), 'utf-8')).decode('utf-8'))
+			'Authorization': 'Basic {}'.format(b64encode('{}:{}'.format(user, pw).encode('utf-8')).decode('utf-8'))
 		}, response_func=response_function,
 		timeout=config.get('xcp_timeout', 10)
 	)
