@@ -5,6 +5,8 @@ from copy import deepcopy
 
 from .util import user_dir
 
+config_name = 'coupa.conf'
+
 config = None
 def get_config():
 	global config
@@ -15,9 +17,10 @@ def set_config(newconf):
 	config = newconf
 
 class SimpleConfig(object):
-	def __init__(self, cli_options={}):
+	def __init__(self, cli_options={}, set_global_config=True):
 		self.lock = threading.RLock()
 		self.user_dir = user_dir
+		self.configname = config_name
 		
 		self.cli_options = deepcopy(cli_options)
 		self.user_config = {}
@@ -26,7 +29,8 @@ class SimpleConfig(object):
 		self.path = self.coupa_path()
 		self.user_config = read_user_config(self.path)
 		
-		set_config(self)
+		if set_global_config:
+			set_config(self)
 	
 	def coupa_path(self):
 		# read coupa_path from command line / system configuration
@@ -60,16 +64,26 @@ class SimpleConfig(object):
 	def save_user_config(self):
 		if not self.path:
 			return None
-		path = os.path.join(self.path, 'coupa.conf')
+		path = os.path.join(self.path, self.configname)
 		f = open(path, 'w')
 		f.write(json.dumps(self.user_config, indent=2, sort_keys=True))
 		f.close()
 	
-def read_user_config(path):
+	def save(self):
+		self.save_user_config()
+		
+	def config_exists(self):
+		if os.path.isfile(os.path.join(self.path, self.configname)):
+			return True
+		return False
+	
+def read_user_config(path, name=None):
 	if not path:
 		return {}
+	if not name:
+		name = config_name
 	
-	config_path = os.path.join(path, 'coupa.conf')
+	config_path = os.path.join(path, name)
 	if not os.path.exists(config_path):
 		return {}
 	try:
@@ -82,3 +96,22 @@ def read_user_config(path):
 	if type(result) is not dict:
 		return {}
 	return result
+
+class WalletConfig(SimpleConfig):
+	def __init__(self, filename):
+		super(WalletConfig, self).__init__(set_global_config=False)
+		
+		self.configname = filename
+		self.path = self.wallet_path()
+		
+		self.user_config = read_user_config(self.path, self.configname)
+	
+	def wallet_path(self):
+		path = os.path.join(self.path, 'wallets')
+		if not os.path.exists(path): # if the directory does not exist, create it
+			if os.path.islink(path):
+				raise Exception('Dangling link: {}'.format(path))
+			os.mkdir(path)
+		return path
+	
+	

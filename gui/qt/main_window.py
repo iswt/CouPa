@@ -105,7 +105,7 @@ class MainWidget(QWidget):
 		super().__init__(parent)
 		self.layout = QGridLayout(self)
 		
-		self.create_history_tab()
+		#self.create_history_tab()
 		
 		self.setLayout(self.layout)
 		

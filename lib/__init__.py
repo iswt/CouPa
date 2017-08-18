@@ -15,6 +15,6 @@ def setup_logging(filename=None):
 	)
 	runlog.setLevel(logging.DEBUG)
 
-from .config import SimpleConfig, get_config
+from .config import SimpleConfig, WalletConfig, get_config
 from .cli import get_parser
 from .network import AsyncRequest
