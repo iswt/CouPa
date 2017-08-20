@@ -38,7 +38,6 @@ class WalletTypeOptions(QWizardPage):
 		self.layout.addWidget(self.label)
 		
 		self.seedcombo = QComboBox(self)
-		self.seedcombo.addItem('BIP32')
 		self.seedcombo.addItem('Counterparty')
 		self.layout.addWidget(self.seedcombo)
 		
@@ -59,7 +58,7 @@ class WalletTypeOptions(QWizardPage):
 		wn = self.parent.field('walletname')
 		self.label.setText('Seed type for <b>{}</b>'.format(wn))
 		
-	
+
 class ConnectionOptions(QWizardPage):
 	def __init__(self, parent=None):
 		super().__init__(parent)
@@ -149,6 +148,8 @@ class InitializationWizard(QWizard):
 	def on_finish(self):
 		walletname = self.field('walletname')
 		seed = self.field('seedentry')
+		seed_type = self.wto.seedcombo.itemText(self.field('seedcombo'))
+		hardened = self.field('hardened')
 		
 		self.config.set_key('btc_url', self.field('bitcoin_url'), False)
 		self.config.set_key('xcp_url', self.field('xcp_url'), False)
@@ -157,9 +158,20 @@ class InitializationWizard(QWizard):
 		self.config.save()
 		
 		wc = WalletConfig(walletname)
-		wc.set_key('seed_type', self.wto.seedcombo.itemText(self.field('seedcombo')), False)
-		wc.set_key('hardened', self.field('hardened'), False)
+		wc.set_key('seed_type', seed_type, False)
+		wc.set_key('hardened', hardened, False)
 		wc.save()
 		
 		if self.main_window:
 			self.main_window.show()
+		
+		# generate initial addresses
+		mb = QMessageBox(self.main_window)
+		mb.setWindowTitle('Generating addresses ...')
+		mb.setText('Generating your addresses')
+		mb.setStandardButtons(QMessageBox.NoButton)
+		mb.setModal(False)
+		mb.show()
+		
+		wc.generate_initial_addresses(seed, self.config.get('initial_address_generation_count', 10), lambda res: mb.accept())
+		

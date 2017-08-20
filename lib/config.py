@@ -96,22 +96,3 @@ def read_user_config(path, name=None):
 	if type(result) is not dict:
 		return {}
 	return result
-
-class WalletConfig(SimpleConfig):
-	def __init__(self, filename):
-		super(WalletConfig, self).__init__(set_global_config=False)
-		
-		self.configname = filename
-		self.path = self.wallet_path()
-		
-		self.user_config = read_user_config(self.path, self.configname)
-	
-	def wallet_path(self):
-		path = os.path.join(self.path, 'wallets')
-		if not os.path.exists(path): # if the directory does not exist, create it
-			if os.path.islink(path):
-				raise Exception('Dangling link: {}'.format(path))
-			os.mkdir(path)
-		return path
-	
-	

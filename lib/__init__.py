@@ -15,6 +15,8 @@ def setup_logging(filename=None):
 	)
 	runlog.setLevel(logging.DEBUG)
 
-from .config import SimpleConfig, WalletConfig, get_config
+from .config import SimpleConfig, get_config, read_user_config
+from .mnemonic import CounterpartyMnemonic
+from .wallet import WalletConfig
 from .cli import get_parser
 from .network import AsyncRequest
