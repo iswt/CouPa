@@ -4,6 +4,7 @@ import os
 import json
 
 from lib import runlog, SimpleConfig, read_user_config, CounterpartyMnemonic
+from lib import bitcoin_utils
 from .util import AsyncAction
 
 def generate_addresses(seed, seed_type, x, y, hardened=True):
@@ -27,6 +28,8 @@ class WalletConfig(SimpleConfig):
 		self.path = self.wallet_path()
 		
 		self.user_config = read_user_config(self.path, self.configname)
+		
+		self.synchronize()
 	
 	def wallet_path(self):
 		path = os.path.join(self.path, 'wallets')
@@ -35,6 +38,29 @@ class WalletConfig(SimpleConfig):
 				raise Exception('Dangling link: {}'.format(path))
 			os.mkdir(path)
 		return path
+	
+	def synchronize(self):
+		'''
+		Called on wallet load, ...
+		'''
+		def cb(newinfo, address):
+			a = self.get('addresses')
+			index = None
+			for ad in a:
+				if ad['address'] == address:
+					index = a.index(ad)
+					break
+			if index is not None:
+				a[index]['utxo'] = newinfo
+				self.set_key('addresses', a)
+				runlog.info('Fetched unspent outputs for address {}: {}'.format(address, newinfo))
+		
+		addys = self.get('addresses')
+		if addys:
+			for addyd in addys:
+				if 'utxos' not in addyd or not addyd['utxos']:
+					runlog.info('Fetching UTXOs for {} ...'.format(addyd['address']))
+					bitcoin_utils.get_utxos_for_address_async(addyd['address'], cb)
 	
 	def generate_initial_addresses(self, seed, initial_count, callback=None):
 		hardened = self.get('hardened', True)

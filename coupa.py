@@ -3,7 +3,7 @@ import sys
 import os
 
 from gui import CouPaGUI
-from lib import get_parser, SimpleConfig, setup_logging, runlog
+from lib import get_parser, SimpleConfig, WalletConfig, setup_logging, runlog
 
 if __name__ == '__main__':
 	parser = get_parser()
@@ -12,6 +12,9 @@ if __name__ == '__main__':
 	config = SimpleConfig(args.__dict__)
 	setup_logging(config.get('logfile'))
 	runlog.debug('CouPa directory is {}'.format(config.path))
+	
+	if config.get('wallet_path'):
+		w = WalletConfig(config.get('wallet_path'))
 	
 	cmd = config.get('cmd')
 	

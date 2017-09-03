@@ -30,6 +30,7 @@ argparse.ArgumentParser.set_default_subparser = set_default_subparser
 def add_global_options(parser):
 	opts = parser.add_argument_group('global options')
 	opts.add_argument('-D', '--dir', dest='coupa_path', help='CouPa directory')
+	opts.add_argument('-w', '--wallet', dest='wallet_path', help='Name of wallet to load')
 
 def get_parser():
 	parser = argparse.ArgumentParser(

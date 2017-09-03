@@ -30,11 +30,14 @@ class AsyncAction(Thread):
 		self.callback = None
 		if 'callback' in kwargs and kwargs['callback']:
 			self.callback = kwargs['callback']
+		self.passthrough_args = []
+		if 'passthrough' in kwargs and kwargs['passthrough']:
+			self.passthrough_args = kwargs['passthrough']
 		
 		self.start()
 	
 	def do_action(self):
 		res = self.action_func(*self.function_args)
 		if self.callback:
-			self.callback(res)
+			self.callback(res, *self.passthrough_args)
 	

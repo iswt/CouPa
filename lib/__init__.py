@@ -17,6 +17,7 @@ def setup_logging(filename=None):
 
 from .config import SimpleConfig, get_config, read_user_config
 from .mnemonic import CounterpartyMnemonic
+from .util import AsyncAction
 from .wallet import WalletConfig
 from .cli import get_parser
 from .network import AsyncRequest
